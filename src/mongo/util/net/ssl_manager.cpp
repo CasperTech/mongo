@@ -553,9 +553,11 @@ StatusWith<DERToken> DERToken::parse(ConstDataRange cdr, size_t* outLength) {
     // This will not overflow since encodedLengthBytesCount <= 9
     const uint64_t tagAndLengthByteCount = kTagLength + encodedLengthBytesCount;
 
+	uint64_t checkOutLength = (uint64_t)*outLength;
+
     // This may overflow since derLength is from user data so check our arithmetic carefully.
-    if (mongoUnsignedAddOverflow64(tagAndLengthByteCount, derLength, outLength) ||
-        *outLength > cdr.length()) {
+    if (mongoUnsignedAddOverflow64(tagAndLengthByteCount, derLength, &checkOutLength) ||
+        checkOutLength > cdr.length()) {
         return Status(ErrorCodes::InvalidSSLConfiguration, "Invalid DER length");
     }
 
